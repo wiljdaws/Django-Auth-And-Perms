@@ -33,7 +33,7 @@ def home(request):
                 except:
                     pass
 
-    return render(request, 'main/home.html', {"posts": posts})
+    return render(request, 'main/index.html', {"posts": posts})
 
 
 @login_required(login_url="/login")
