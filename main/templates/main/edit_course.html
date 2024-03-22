@@ -1,0 +1,51 @@
+{% extends "main/base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}
+Edit Course
+{% endblock %}
+
+{% block container_class %}
+container
+{% endblock %}
+
+{% block content %}
+<style>
+    .form-label {
+        color: #333; /* Change this to the color you want */
+    }
+    .header-text {
+        color: #333; /* Change this to the color you want */
+    }
+</style>
+<div class="row mt-5">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2 class="header-text">Edit Course</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{% url 'edit_course' course.id %}">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="form-group mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field|add_class:"form-control" }}
+                        {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                    <div class="form-group text-center">
+                        <input type="submit" value="Save Changes" class="btn btn-primary">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

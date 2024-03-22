@@ -2,13 +2,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Course, Professor
 from django.forms import ModelForm
 from datetime import datetime
-from django.contrib.auth import login
-from .forms import RegisterForm
+from django.contrib.auth import login, logout
+from .forms import RegisterForm, CourseForm, ProfessorForm
 
 from django.contrib.auth.models import User
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponseRedirect
 
 class CourseForm(ModelForm):
     class Meta:
@@ -40,6 +42,30 @@ def courses(request):
         current_year = datetime.now().year
         return render(request, 'main/courses.html', {'form': form, 'courses': courses, 'professors': professors, 'current_year': current_year})
 
+
+@staff_member_required
+def add_professor(request):
+    if request.method == 'POST':
+        form = ProfessorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/professors')
+    else:
+        form = ProfessorForm()
+    return render(request, 'main/add_professor.html', {'form': form})
+
+@staff_member_required
+def add_course(request):
+    if request.method == 'POST':
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('courses')
+    else:
+        form = CourseForm()
+    return render(request, 'main/add_course.html', {'course_form': form})
+
+@staff_member_required
 def edit_course(request, id):
     course = get_object_or_404(Course, id=id)
     professors = Professor.objects.all()  # Fetch all professors
@@ -53,6 +79,7 @@ def edit_course(request, id):
         form = CourseForm(instance=course)
         return render(request, 'main/edit_course.html', {'form': form, 'course': course, 'professors': professors, 'current_year': current_year})
 
+@staff_member_required
 def delete_course(request, id):
     course = get_object_or_404(Course, id=id)
     if request.method == 'POST':
@@ -71,6 +98,13 @@ def professors(request):
         professors = Professor.objects.all()
         return render(request, 'main/professors.html', {'form': form, 'professors': professors})
 
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')
+
+@staff_member_required
 def edit_professor(request, id):
     professor = get_object_or_404(Professor, id=id)
     if request.method == 'POST':
@@ -82,15 +116,12 @@ def edit_professor(request, id):
         form = ProfessorForm(instance=professor)
         return render(request, 'main/edit_professor.html', {'form': form, 'professor': professor})
 
+@staff_member_required
 def delete_professor(request, id):
     professor = get_object_or_404(Professor, id=id)
-    if professor.course_set.exists():
-        error_message = 'Cannot delete professor. They are still assigned to a course.'
-        return render(request, 'main/delete_professor.html', {'professor': professor, 'error_message': error_message})
     if request.method == 'POST':
         professor.delete()
         return redirect('/professors')
-    return render(request, 'main/delete_professor.html', {'professor': professor})
 
 def home(request):
     return render(request, 'main/index.html')
