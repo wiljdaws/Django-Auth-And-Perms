@@ -1,65 +1,117 @@
-from django.shortcuts import render, redirect
-from .forms import RegisterForm, PostForm
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.models import User, Group
-from .models import Post
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Course, Professor
+from django.forms import ModelForm
+from datetime import datetime
+from django.contrib.auth import login
+from .forms import RegisterForm
 
+from django.contrib.auth.models import User
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
-@login_required(login_url="/login")
-def home(request):
-    posts = Post.objects.all()
+class CourseForm(ModelForm):
+    class Meta:
+        model = Course
+        fields = ['name', 'description', 'professor', 'semester']
 
-    if request.method == "POST":
-        post_id = request.POST.get("post-id")
-        user_id = request.POST.get("user-id")
+class ProfessorForm(ModelForm):
+    class Meta:
+        model = Professor
+        fields = ['name']
 
-        if post_id:
-            post = Post.objects.filter(id=post_id).first()
-            if post and (post.author == request.user or request.user.has_perm("main.delete_post")):
-                post.delete()
-        elif user_id:
-            user = User.objects.filter(id=user_id).first()
-            if user and request.user.is_staff:
-                try:
-                    group = Group.objects.get(name='default')
-                    group.user_set.remove(user)
-                except:
-                    pass
+class RegisterForm(UserCreationForm):
+    username = forms.CharField(max_length=30)
 
-                try:
-                    group = Group.objects.get(name='mod')
-                    group.user_set.remove(user)
-                except:
-                    pass
+    class Meta:
+        model = User
+        fields = ("username", "password1", "password2")
 
-    return render(request, 'main/index.html', {"posts": posts})
-
-
-@login_required(login_url="/login")
-# @permission_required("main.add_post", login_url="/login", raise_exception=True)
-def create_post(request):
+def courses(request):
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = CourseForm(request.POST)
         if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            return redirect("/home")
+            form.save()
+            return redirect('/courses')
     else:
-        form = PostForm()
+        form = CourseForm()
+        courses = Course.objects.all()
+        professors = Professor.objects.all()
+        current_year = datetime.now().year
+        return render(request, 'main/courses.html', {'form': form, 'courses': courses, 'professors': professors, 'current_year': current_year})
 
-    return render(request, 'main/create_post.html', {"form": form})
+def edit_course(request, id):
+    course = get_object_or_404(Course, id=id)
+    professors = Professor.objects.all()  # Fetch all professors
+    current_year = datetime.now().year
+    if request.method == 'POST':
+        form = CourseForm(request.POST, instance=course)
+        if form.is_valid():
+            form.save()
+            return redirect('/courses')
+    else:
+        form = CourseForm(instance=course)
+        return render(request, 'main/edit_course.html', {'form': form, 'course': course, 'professors': professors, 'current_year': current_year})
+
+def delete_course(request, id):
+    course = get_object_or_404(Course, id=id)
+    if request.method == 'POST':
+        course.delete()
+        return redirect('/courses')
+    return render(request, 'main/delete_course.html', {'course': course})
+
+def professors(request):
+    if request.method == 'POST':
+        form = ProfessorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/professors')
+    else:
+        form = ProfessorForm()
+        professors = Professor.objects.all()
+        return render(request, 'main/professors.html', {'form': form, 'professors': professors})
+
+def edit_professor(request, id):
+    professor = get_object_or_404(Professor, id=id)
+    if request.method == 'POST':
+        form = ProfessorForm(request.POST, instance=professor)
+        if form.is_valid():
+            form.save()
+            return redirect('/professors')
+    else:
+        form = ProfessorForm(instance=professor)
+        return render(request, 'main/edit_professor.html', {'form': form, 'professor': professor})
+
+def delete_professor(request, id):
+    professor = get_object_or_404(Professor, id=id)
+    if professor.course_set.exists():
+        error_message = 'Cannot delete professor. They are still assigned to a course.'
+        return render(request, 'main/delete_professor.html', {'professor': professor, 'error_message': error_message})
+    if request.method == 'POST':
+        professor.delete()
+        return redirect('/professors')
+    return render(request, 'main/delete_professor.html', {'professor': professor})
+
+def home(request):
+    return render(request, 'main/index.html')
 
 
-def sign_up(request):
+def signup(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            original_username = form.cleaned_data.get('username')
+            if not original_username:
+                form.add_error('username', 'This field is required.')
+                return render(request, 'registration/sign_up.html', {'form': form})
+            username = original_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = original_username + str(counter)
+                counter += 1
+            user = User.objects.create_user(username=username, password=form.cleaned_data.get('password1'))
             login(request, user)
-            return redirect('/home')
+            return redirect('home')
     else:
         form = RegisterForm()
-
-    return render(request, 'registration/sign_up.html', {"form": form})
+    return render(request, 'registration/sign_up.html', {'form': form})

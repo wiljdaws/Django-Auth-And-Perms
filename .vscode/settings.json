@@ -1,0 +1,35 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "dallas-college.cbuws4s4i0yt.us-east-1.rds.amazonaws.com",
+            "port": 5432,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "name": "dallas college",
+            "database": "dallascollege",
+            "username": "wiljdaws"
+        },
+        {
+            "previewLimit": 50,
+            "server": "dallas-college.cbuws4s4i0yt.us-east-1.rds.amazonaws.com",
+            "port": 5432,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "name": "dallas college project",
+            "database": "dallascollege",
+            "username": "wiljdaws"
+        },
+        {
+            "previewLimit": 50,
+            "server": "dallas-college.cbuws4s4i0yt.us-east-1.rds.amazonaws.com",
+            "port": 5432,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "name": "dc",
+            "database": "dallascollege",
+            "username": "wiljdaws",
+            "group": "django.db.backends.postgresql"
+        }
+    ]
+}
