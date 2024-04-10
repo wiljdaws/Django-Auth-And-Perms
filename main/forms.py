@@ -42,8 +42,26 @@ class CourseForm(forms.ModelForm):
 
 
 class ProfessorForm(forms.ModelForm):
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+
     class Meta:
         model = Professor
-        fields = ['name']
-        
-    
+        fields = ['first_name', 'last_name', 'phone_number', 'office_location']
+
+    def save(self, commit=True):
+        professor = super().save(commit=False)
+        professor.name = f"{professor.first_name} {professor.last_name}"
+        base_email = f"{professor.first_name[0]}{professor.last_name}@dallascollege.edu"
+        email = base_email
+        increment = 1
+
+        while Professor.objects.filter(email=email).exists():
+            email = f"{base_email}{increment}"
+            increment += 1
+
+        professor.email = email
+
+        if commit:
+            professor.save()
+        return professor
