@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Course, Professor
+from .models import Course, Professor, Office
 from django.forms import ModelForm
 from datetime import datetime
 from django.contrib.auth import login, logout
-from .forms import RegisterForm, CourseForm, ProfessorForm
+from .forms import RegisterForm, CourseForm, ProfessorForm, OfficeForm
 
 from django.contrib.auth.models import User
 from django import forms
@@ -12,14 +12,33 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseRedirect
 
-class CourseForm(ModelForm):
+class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
-        fields = ['name', 'description', 'professor', 'semester']
+        fields = ['id', 'name', 'description', 'professor', 'start_date']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+
+        if start_date:
+            if start_date.month >= Course.SPRING_START_MONTH and start_date.month < Course.SUMMER_START_MONTH:
+                semester = 'Spring'
+            elif start_date.month >= Course.SUMMER_START_MONTH and start_date.month < Course.FALL_START_MONTH:
+                semester = 'Summer'
+            elif start_date.month >= Course.FALL_START_MONTH and start_date.month < Course.WINTER_START_MONTH:
+                semester = 'Fall'
+            else:
+                semester = 'Winter'
+
+            cleaned_data['semester'] = semester
+
+        return cleaned_data
 
 class ProfessorForm(forms.ModelForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
+    office_location = forms.ModelChoiceField(queryset=Office.objects.all())
 
     class Meta:
         model = Professor
@@ -62,6 +81,26 @@ def courses(request):
         current_year = datetime.now().year
         return render(request, 'main/courses.html', {'form': form, 'courses': courses, 'professors': professors, 'current_year': current_year})
 
+class OfficeForm(forms.ModelForm):
+    building = forms.CharField(required=True)
+    room_number = forms.IntegerField(required=True)
+    address = forms.CharField(required=True)
+    
+    class Meta:
+        model = Office
+        fields = ['building', 'room_number', 'address']  
+
+def office(request):
+    if request.method == 'POST':
+        form = OfficeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/offices')
+    else:
+        form = OfficeForm()
+        offices = Office.objects.all()
+        return render(request, 'main/offices.html', {'office_form': form, 'offices': offices})
+
 
 @staff_member_required
 def add_professor(request):
@@ -84,6 +123,43 @@ def add_course(request):
     else:
         form = CourseForm()
     return render(request, 'main/add_course.html', {'course_form': form})
+
+@staff_member_required
+def add_office(request):
+    if request.method == 'POST':
+        form = OfficeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('offices')
+    else:
+        form = OfficeForm()
+    return render(request, 'main/add_office.html', {'office_form': form})
+
+@staff_member_required
+def offices(request):
+    offices = Office.objects.all()
+    return render(request, 'main/offices.html', {'office_form': offices})
+
+@staff_member_required
+def edit_office(request, id):
+    office = get_object_or_404(Office, id=id)
+    if request.method == 'POST':
+        form = OfficeForm(request.POST, instance=office)
+        if form.is_valid():
+            form.save()
+            return redirect('/offices')
+    else:
+        form = OfficeForm(instance=office)
+        return render(request, 'main/edit_office.html', {'office_form': form, 'office': office})
+
+@staff_member_required
+def delete_office(request, id):
+    office = get_object_or_404(Office, id=id)
+    if request.method == 'POST':
+        office.delete()
+        return redirect('/offices')
+    return render(request, 'main/delete_office.html', {'office_form': office})
+
 
 @staff_member_required
 def edit_course(request, id):

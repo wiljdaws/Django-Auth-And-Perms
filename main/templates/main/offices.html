@@ -1,0 +1,65 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}
+Dallas College Offices
+{% endblock %}
+
+{% block container_class %}
+container
+{% endblock %}
+
+{% block content %}
+{% block extra_style %}
+<style>
+    .header-text {
+        color: #000 !important; /* Change this to the color you want */
+    }
+</style>
+{% endblock %}
+<div class="row mt-5">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2 class="header-text">Offices</h2>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Building</th>
+                            <th scope="col">Room Number</th>
+                            <th scope="col">Address</th>
+                            <!-- Add more columns as needed -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for office in offices %}
+                        <tr>
+                            <td>{{ office.building }}</td>
+                            <td>{{ office.room_number }}</td>
+                            <td>{{ office.address }}</td>
+                            <!-- Add more fields as needed -->
+                            {% if user.is_staff %}
+                            <td>
+                                <a href="{% url 'edit_office' office.id %}" class="btn btn-secondary">Edit</a>
+                                <form method="POST" action="{% url 'delete_office' office.id %}" onsubmit="return confirm('Are you sure you want to delete this office?');" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="submit" value="Delete" class="btn btn-danger">
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="text-center mt-3">
+                    {% if user.is_staff %}
+                    <a href="{% url 'add_office' %}" class="btn btn-primary">Add Office</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

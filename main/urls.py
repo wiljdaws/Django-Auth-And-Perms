@@ -15,5 +15,9 @@ urlpatterns = [
     path('delete_professor/<int:id>/', views.delete_professor, name='delete_professor'),
     path('add_professor/', views.add_professor, name='add_professor'),
     path('add_course/', views.add_course, name='add_course'),
+    path('offices/', views.office, name='offices'),
+    path('add_office/', views.add_office, name='add_office'),
+    path('edit_office/<int:id>/', views.edit_office, name='edit_office'),
+    path('delete_office/<int:id>/', views.delete_office, name='delete_office'),
     path('logout/', views.logout_view, name='logout'),
 ]
