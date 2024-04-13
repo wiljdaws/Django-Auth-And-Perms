@@ -34,7 +34,7 @@ class RegisterForm(UserCreationForm):
 class CourseForm(forms.ModelForm):
     class Meta:
         model = Course
-        fields = ['id', 'name', 'description', 'professor', 'start_date']
+        fields = ['id', 'name', 'description', 'professor', 'start_date', 'end_date']
 
     def clean(self):
         cleaned_data = super().clean()

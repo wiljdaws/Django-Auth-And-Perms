@@ -18,7 +18,7 @@ container
 </style>
 {% endblock %}
 <div class="row mt-5">
-    <div class="col-lg-8 offset-lg-2">
+    <div class="col-lg-9 offset-lg-2">
         <div class="card">
             <div class="card-header text-center">
                 <h2 class="header-text">Courses</h2>
@@ -27,16 +27,24 @@ container
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th scope="col">Course Number</th>
                             <th scope="col">Course Name</th>
                             <th scope="col">Professor</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th> <!-- New column for days of week -->
                             <!-- Add more columns as needed -->
                         </tr>
                     </thead>
                     <tbody>
                         {% for course in courses %}
                         <tr>
+                            <td>{{ course.course_number }}</td>
                             <td>{{ course.name }}</td>
                             <td>{{ course.professor }}</td>
+                            <td>{{ course.description }}</td>
+                            <td>{{ course.start_date }}</td>
+                            <td>{{ course.end_date }}</td>
                             <!-- Add more fields as needed -->
                             {% if user.is_staff %}
                             <td>

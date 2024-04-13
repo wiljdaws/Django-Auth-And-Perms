@@ -30,10 +30,12 @@ class Course(models.Model):
     WINTER_START_MONTH = 12
 
     id = models.AutoField(primary_key=True)
+    course_number = models.CharField(max_length=10)
     name = models.CharField(max_length=50, default='Default Course Name')
     description = models.CharField(max_length=200, default='Default Description')
     professor = models.ForeignKey(Professor, related_name='courses', on_delete=models.CASCADE)
     start_date = models.DateField(default=timezone.now, validators=[validate_year])
+    end_date = models.DateField(default=timezone.now, validators=[validate_year])
 
     def semester(self):
         if self.start_date.month >= self.SPRING_START_MONTH and self.start_date.month < self.SUMMER_START_MONTH:
