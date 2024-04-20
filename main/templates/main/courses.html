@@ -25,14 +25,18 @@ container
             </div>
             <div class="card-body">
                 <div class="table-responsive"> 
-                    <table class="table table-hover" style="table-layout: auto; white-space: nowrap;">
+                    <table id= "myTable" class="table table-hover" style="table-layout: auto; white-space: nowrap;">
                         <thead>
                             <tr>
                                 {% if user.is_staff %}
                                 <th scope="col">Modify Course</th>
                                 {% endif %}
-                                <th scope="col">Course Number</th>
-                                <th scope="col">Course Name</th>
+                                <th>
+                                    <input type="text" id="courseNumberFilter" onkeyup="filterTable(0, 'courseNumberFilter')" placeholder="Course Number">
+                                </th>
+                                <th>
+                                    <input type="text" id="courseNameFilter" onkeyup="filterTable(1, 'courseNameFilter')" placeholder="Course Name">
+                                </th>
                                 <th scope="col">Professor</th>
                                 <th scope="col">Description</th>
                                 <th scope="col">Start Date</th>
@@ -74,4 +78,23 @@ container
         </div>
     </div>
 </div>
+<script>
+function filterTable(column, inputId) {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById(inputId);
+    filter = input.value.toUpperCase();
+    table = document.getElementById("myTable");
+    tr = table.getElementsByTagName("tr");
+    for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[column];
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
 {% endblock %}

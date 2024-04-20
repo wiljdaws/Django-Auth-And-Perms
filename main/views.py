@@ -75,8 +75,16 @@ def courses(request):
             form.save()
             return redirect('/courses')
     else:
-        form = CourseForm()
         courses = Course.objects.all()
+
+        course_number = request.GET.get('course_number')
+        if course_number:
+            courses = courses.filter(course_number__icontains=course_number)
+
+        course_name = request.GET.get('course_name')
+        if course_name:
+            courses = courses.filter(name__icontains=course_name)
+        form = CourseForm()
         professors = Professor.objects.all()
         current_year = datetime.now().year
         return render(request, 'main/courses.html', {'form': form, 'courses': courses, 'professors': professors, 'current_year': current_year})
