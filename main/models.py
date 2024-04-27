@@ -49,6 +49,33 @@ class Course(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.semester()} {self.start_date.year}"
+
+class Section(models.Model):
+    SPRING_START_MONTH = 3
+    SUMMER_START_MONTH = 6
+    FALL_START_MONTH = 9
+    WINTER_START_MONTH = 12
+
+    id = models.AutoField(primary_key=True)
+    section_number = models.CharField(max_length=5)
+    name = models.CharField(max_length=50, default='Default Section Name')
+    description = models.CharField(max_length=200, default='Default Description')
+    professor = models.ForeignKey(Professor, related_name='sections', on_delete=models.CASCADE)
+    start_date = models.DateField(default=timezone.now, validators=[validate_year])
+    end_date = models.DateField(default=timezone.now, validators=[validate_year])
+
+    def semester(self):
+        if self.start_date.month >= self.SPRING_START_MONTH and self.start_date.month < self.SUMMER_START_MONTH:
+            return 'Spring'
+        elif self.start_date.month >= self.SUMMER_START_MONTH and self.start_date.month < self.FALL_START_MONTH:
+            return 'Summer'
+        elif self.start_date.month >= self.FALL_START_MONTH and self.start_date.month < self.WINTER_START_MONTH:
+            return 'Fall'
+        else:
+            return 'Winter'
+
+    def __str__(self):
+        return f"{self.name} - {self.semester()} {self.start_date.year}"
     
 class Office(models.Model):
     building = models.CharField(max_length=100)

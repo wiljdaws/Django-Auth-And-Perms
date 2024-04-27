@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Course, Professor, Office
+from .models import Course, Professor, Office, Section
 from django.forms import ModelForm
 from datetime import datetime
 from django.contrib.auth import login, logout
-from .forms import RegisterForm, CourseForm, ProfessorForm, OfficeForm
+from .forms import RegisterForm, CourseForm, ProfessorForm, OfficeForm, SectionForm
 
 from django.contrib.auth.models import User
 from django import forms
@@ -27,6 +27,29 @@ class CourseForm(forms.ModelForm):
             elif start_date.month >= Course.SUMMER_START_MONTH and start_date.month < Course.FALL_START_MONTH:
                 semester = 'Summer'
             elif start_date.month >= Course.FALL_START_MONTH and start_date.month < Course.WINTER_START_MONTH:
+                semester = 'Fall'
+            else:
+                semester = 'Winter'
+
+            cleaned_data['semester'] = semester
+
+        return cleaned_data
+
+class SectionForm(forms.ModelForm):
+    class Meta:
+        model = Section
+        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'end_date']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+
+        if start_date:
+            if start_date.month >= Section.SPRING_START_MONTH and start_date.month < Section.SUMMER_START_MONTH:
+                semester = 'Spring'
+            elif start_date.month >= Section.SUMMER_START_MONTH and start_date.month < Section.FALL_START_MONTH:
+                semester = 'Summer'
+            elif start_date.month >= Section.FALL_START_MONTH and start_date.month < Section.WINTER_START_MONTH:
                 semester = 'Fall'
             else:
                 semester = 'Winter'
@@ -89,6 +112,27 @@ def courses(request):
         current_year = datetime.now().year
         return render(request, 'main/courses.html', {'form': form, 'courses': courses, 'professors': professors, 'current_year': current_year})
 
+def sections(request):
+    if request.method == 'POST':
+        form = SectionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/sections')
+    else:
+        sections = Section.objects.all()
+
+        section_number = request.GET.get('section_number')
+        if section_number:
+            sections = sections.filter(section_number__icontains=section_number)
+
+        section_name = request.GET.get('section_name')
+        if section_name:
+            sections = sections.filter(name__icontains=section_name)
+        form = SectionForm()
+        professors = Professor.objects.all()
+        current_year = datetime.now().year
+        return render(request, 'main/sections.html', {'form': form, 'sections': sections, 'professors': professors, 'current_year': current_year})
+
 class OfficeForm(forms.ModelForm):
     building = forms.CharField(required=True)
     room_number = forms.IntegerField(required=True)
@@ -108,6 +152,29 @@ def office(request):
         form = OfficeForm()
         offices = Office.objects.all()
         return render(request, 'main/offices.html', {'office_form': form, 'offices': offices})
+
+class SectionForm(forms.ModelForm):
+    class Meta:
+        model = Section
+        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'end_date']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+
+        if start_date:
+            if start_date.month >= Course.SPRING_START_MONTH and start_date.month < Course.SUMMER_START_MONTH:
+                semester = 'Spring'
+            elif start_date.month >= Course.SUMMER_START_MONTH and start_date.month < Course.FALL_START_MONTH:
+                semester = 'Summer'
+            elif start_date.month >= Course.FALL_START_MONTH and start_date.month < Course.WINTER_START_MONTH:
+                semester = 'Fall'
+            else:
+                semester = 'Winter'
+
+            cleaned_data['semester'] = semester
+
+        return cleaned_data
 
 
 @staff_member_required
@@ -250,3 +317,36 @@ def signup(request):
     else:
         form = RegisterForm()
     return render(request, 'registration/sign_up.html', {'form': form})
+
+@staff_member_required
+def add_section(request):
+    if request.method == 'POST':
+        form = SectionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('sections')
+    else:
+        form = SectionForm()
+    return render(request, 'main/add_section.html', {'section_form': form})
+
+@staff_member_required
+def edit_section(request, id):
+    section = get_object_or_404(Section, id=id)
+    professors = Professor.objects.all()  # Fetch all professors
+    current_year = datetime.now().year
+    if request.method == 'POST':
+        form = SectionForm(request.POST, instance=section)
+        if form.is_valid():
+            form.save()
+            return redirect('/sections')
+    else:
+        form = SectionForm(instance=section)
+        return render(request, 'main/edit_section.html', {'form': form, 'section': section, 'professors': professors, 'current_year': current_year})
+
+@staff_member_required
+def delete_section(request, id):
+    section = get_object_or_404(Section, id=id)
+    if request.method == 'POST':
+        section.delete()
+        return redirect('/sections')
+    return render(request, 'main/delete_section.html', {'section': section})

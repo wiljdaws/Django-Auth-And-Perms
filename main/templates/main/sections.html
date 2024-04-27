@@ -1,0 +1,100 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}
+Dallas College Sections
+{% endblock %}
+
+{% block container_class %}
+container
+{% endblock %}
+
+{% block content %}
+{% block extra_style %}
+<style>
+    .header-text {
+        color: #000 !important; /* Change this to the color you want */
+    }
+</style>
+{% endblock %}
+<div class="row mt-5">
+    <div class="col-lg-9 offset-lg-2">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2 class="header-text">Sections</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive"> 
+                    <table id= "myTable" class="table table-hover" style="table-layout: auto; white-space: nowrap;">
+                        <thead>
+                            <tr>
+                                {% if user.is_staff %}
+                                <th scope="col">Modify Section</th>
+                                {% endif %}
+                                <th>
+                                    <input type="text" id="sectionNumberFilter" onkeyup="filterTable(0, 'sectionNumberFilter')" placeholder="Section Number">
+                                </th>
+                                <th>
+                                    <input type="text" id="sectioneNameFilter" onkeyup="filterTable(1, 'sectionNameFilter')" placeholder="Section Name">
+                                </th>
+                                <th scope="col">Professor</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Start Date</th>
+                                <th scope="col">End Date</th> <!-- New column for days of week -->
+                                <!-- Add more columns as needed -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for section in sections %}
+                            <tr>
+                                {% if user.is_staff %}
+                                <td>
+                                    <a href="{% url 'edit_section' section.id %}" class="btn btn-secondary">Edit</a>
+                                    <form method="POST" action="{% url 'delete_section' section.id %}" onsubmit="return confirm('Are you sure you want to delete {{ section.name }}?');" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="submit" value="Delete" class="btn btn-danger">
+                                    </form>
+                                </td>
+                                {% endif %}
+                                <td>{{ course.section_number }}</td>
+                                <td>{{ course.name }}</td>
+                                <td>{{ course.professor }}</td>
+                                <td>{{ course.description }}</td>
+                                <td>{{ course.start_date }}</td>
+                                <td>{{ course.end_date }}</td>
+                                <!-- Add more fields as needed -->
+                                
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    {% if user.is_staff %}
+                    <a href="{% url 'add_section' %}" class="btn btn-primary">Add Section</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function filterTable(column, inputId) {
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById(inputId);
+    filter = input.value.toUpperCase();
+    table = document.getElementById("myTable");
+    tr = table.getElementsByTagName("tr");
+    for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[column];
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
+{% endblock %}

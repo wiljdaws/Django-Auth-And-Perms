@@ -20,4 +20,8 @@ urlpatterns = [
     path('edit_office/<int:id>/', views.edit_office, name='edit_office'),
     path('delete_office/<int:id>/', views.delete_office, name='delete_office'),
     path('logout/', views.logout_view, name='logout'),
+    path('sections/', views.sections, name='sections'),
+    path('add_section/', views.add_section, name='add_section'),
+    path('edit_section/<int:id>/', views.edit_section, name='edit_section'),
+    path('delete_section/<int:id>/', views.delete_section, name='delete_section'),
 ]
