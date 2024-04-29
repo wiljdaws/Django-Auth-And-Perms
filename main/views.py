@@ -88,6 +88,8 @@ class ProfessorForm(forms.ModelForm):
 
     def save(self, commit=True):
         professor = super().save(commit=False)
+        professor.first_name = professor.first_name.capitalize()
+        professor.last_name = professor.last_name.capitalize()
         professor.name = f"{professor.first_name} {professor.last_name}"
         base_email = f"{professor.first_name[0]}{professor.last_name}".lower()  # Convert to lowercase
         domain = "@dallascollege.edu"
