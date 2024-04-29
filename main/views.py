@@ -35,14 +35,26 @@ class CourseForm(forms.ModelForm):
 
         return cleaned_data
 
+from datetime import timedelta
+
 class SectionForm(forms.ModelForm):
+    WEEK_CHOICES = [
+        (4, '4 weeks'),
+        (6, '6 weeks'),
+        (12, '12 weeks'),
+        (18, '18 weeks'),
+    ]
+
+    weeks = forms.ChoiceField(choices=WEEK_CHOICES)
+
     class Meta:
         model = Section
-        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'end_date']
+        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'weeks']
 
     def clean(self):
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')
+        weeks = cleaned_data.get('weeks')
 
         if start_date:
             if start_date.month >= Section.SPRING_START_MONTH and start_date.month < Section.SUMMER_START_MONTH:
@@ -55,6 +67,13 @@ class SectionForm(forms.ModelForm):
                 semester = 'Winter'
 
             cleaned_data['semester'] = semester
+
+        if start_date and weeks:
+            # Calculate the end date by adding the number of weeks to the start date
+            end_date = start_date + timedelta(weeks=int(weeks))
+
+            # Update the cleaned_data dictionary with the calculated end date
+            cleaned_data['end_date'] = end_date
 
         return cleaned_data
 
@@ -94,6 +113,7 @@ class RegisterForm(UserCreationForm):
 def courses(request):
     if request.method == 'POST':
         form = CourseForm(request.POST)
+        form.clean()
         if form.is_valid():
             form.save()
             return redirect('/courses')
@@ -114,9 +134,11 @@ def courses(request):
 
 def sections(request):
     if request.method == 'POST':
-        form = SectionForm(request.POST)
-        if form.is_valid():
-            form.save()
+        section_form = SectionForm(request.POST)
+        section_form.clean()
+        if section_form.is_valid():
+            print(f"End date: {section_form.cleaned_data['end_date']}")
+            section_form.save()
             return redirect('/sections')
     else:
         sections = Section.objects.all()
@@ -128,10 +150,10 @@ def sections(request):
         section_name = request.GET.get('section_name')
         if section_name:
             sections = sections.filter(name__icontains=section_name)
-        form = SectionForm()
+        section_form = SectionForm()
         professors = Professor.objects.all()
         current_year = datetime.now().year
-        return render(request, 'main/sections.html', {'form': form, 'sections': sections, 'professors': professors, 'current_year': current_year})
+        return render(request, 'main/sections.html', {'section_form': section_form, 'sections': sections, 'professors': professors, 'current_year': current_year})
 
 class OfficeForm(forms.ModelForm):
     building = forms.CharField(required=True)
@@ -153,29 +175,62 @@ def office(request):
         offices = Office.objects.all()
         return render(request, 'main/offices.html', {'office_form': form, 'offices': offices})
 
+from datetime import timedelta
+
 class SectionForm(forms.ModelForm):
+    WEEK_CHOICES = [
+        (4, '4 weeks'),
+        (6, '6 weeks'),
+        (12, '12 weeks'),
+        (18, '18 weeks'),
+    ]
+
+    weeks = forms.ChoiceField(choices=WEEK_CHOICES)
+    #end_date = forms.DateTimeField(widget=forms.HiddenInput()) 
+    
     class Meta:
         model = Section
-        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'end_date']
+        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'weeks']
+        # Removed 'end_date' from fields
 
     def clean(self):
+        print("Clean method is called")  # Add this line
         cleaned_data = super().clean()
         start_date = cleaned_data.get('start_date')
+        weeks = cleaned_data.get('weeks')
 
         if start_date:
-            if start_date.month >= Course.SPRING_START_MONTH and start_date.month < Course.SUMMER_START_MONTH:
+            if start_date.month >= Section.SPRING_START_MONTH and start_date.month < Section.SUMMER_START_MONTH:
                 semester = 'Spring'
-            elif start_date.month >= Course.SUMMER_START_MONTH and start_date.month < Course.FALL_START_MONTH:
+            elif start_date.month >= Section.SUMMER_START_MONTH and start_date.month < Section.FALL_START_MONTH:
                 semester = 'Summer'
-            elif start_date.month >= Course.FALL_START_MONTH and start_date.month < Course.WINTER_START_MONTH:
+            elif start_date.month >= Section.FALL_START_MONTH and start_date.month < Section.WINTER_START_MONTH:
                 semester = 'Fall'
             else:
                 semester = 'Winter'
 
             cleaned_data['semester'] = semester
 
-        return cleaned_data
+        if start_date and weeks:
+            # Calculate the end date by adding the number of weeks to the start date
+            end_date = start_date + timedelta(weeks=int(weeks))
 
+            # Update the cleaned_data dictionary with the calculated end date
+            cleaned_data['end_date'] = end_date
+            #print(f"{end_date = }")
+
+        return cleaned_data
+    
+    def save(self, commit=True):
+        # Call the original save method to save the fields included in the form
+        section = super().save(commit=False)
+
+        # Update the end_date field manually
+        section.end_date = self.cleaned_data['end_date']
+
+        if commit:
+            section.save()
+        return section
 
 @staff_member_required
 def add_professor(request):
@@ -322,7 +377,9 @@ def signup(request):
 def add_section(request):
     if request.method == 'POST':
         form = SectionForm(request.POST)
+        
         if form.is_valid():
+            print(f"End date: {form.cleaned_data['end_date']}")
             form.save()
             return redirect('sections')
     else:
