@@ -35,14 +35,22 @@ container
                                     <input type="text" id="sectionNumberFilter" onkeyup="filterTable(0, 'sectionNumberFilter')" placeholder="Section Number">
                                 </th>
                                 <th>
-                                    <input type="text" id="sectioneNameFilter" onkeyup="filterTable(1, 'sectionNameFilter')" placeholder="Section Name">
+                                    <input type="text" id="courseNameFilter" onkeyup="filterTable(1, 'courseNameFilter')" placeholder="Course Name">
                                 </th>
                                 <th scope="col">Professor</th>
-                                <th scope="col">Description</th>
+                                <th scope="col">Course Description</th>
                                 <th scope="col">Start Date</th>
-                                <th scope="col">End Date</th> <!-- New column for days of week -->
+                                <th scope="col">End Date</th>
+                                <th scope="col">Course Code</th>
+                                <th scope="col">Subject</th>
+                                <th scope="col">Meeting Information</th>
+                                <th scope="col">Maximum Seat Capacity</th>
+                                <th scope="col">Credits</th>
+                                <th scope="col">Grading</th>
+                                <th scope="col">Requisites</th>
+                                <th scope="col">Topic</th>  <!-- New column for days of week -->
                                 <!-- Add more columns as needed -->
-                            </tr>
+                           </tr>
                         </thead>
                         <tbody>
                             {% for section in sections %}
@@ -62,9 +70,17 @@ container
                                 <td>{{ section.description }}</td>
                                 <td>{{ section.start_date }}</td>
                                 <td>{{ section.end_date }}</td>
+                                <td>{{ section.course_code }}</td>
+                                <td>{{ section.subject }}</td>
+                                <td>{{ section.meeting_info }}</td>
+                                <td>{{ section.seat_capacity }}</td>
+                                <td>{{ section.credit }}</td>
+                                <td>{{ section.grading }}</td>
+                                <td>{{ section.requisites }}</td>
+                                <td>{{ section.topic }}</td>
                                 <!-- Add more fields as needed -->
                                 
-                            </tr>
+                           </tr>
                             {% endfor %}
                         </tbody>
                     </table>

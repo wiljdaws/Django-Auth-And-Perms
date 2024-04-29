@@ -63,6 +63,14 @@ class Section(models.Model):
     professor = models.ForeignKey(Professor, related_name='sections', on_delete=models.CASCADE)
     start_date = models.DateField(default=timezone.now, validators=[validate_year])
     end_date = models.DateField(default=timezone.now, validators=[validate_year])
+    course_code = models.CharField(max_length=4, default='Course Code')
+    subject = models.CharField(max_length=50, default='Default Subject')
+    meeting_info = models.CharField(max_length=50, default='Meeting Information')
+    seat_capacity = models.IntegerField()
+    credit = models.IntegerField()
+    grading = models.CharField(max_length=50, default='Grading Method')
+    requisites = models.CharField(max_length=200, default='Requisites Needed')
+    topic = models.CharField(max_length=200, default='Topic')
 
     def semester(self):
         if self.start_date.month >= self.SPRING_START_MONTH and self.start_date.month < self.SUMMER_START_MONTH:
