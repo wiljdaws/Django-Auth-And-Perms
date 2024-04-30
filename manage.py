@@ -2,7 +2,8 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+import platform
+import subprocess
 
 def main():
     """Run administrative tasks."""
@@ -15,8 +16,15 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+    
+    current_os = platform.system()
+    if current_os == "Windows":
+        subprocess.call(["cmd.exe", "/C", "activate_venv.bat"])
+    elif current_os in ["Linux", "Darwin"]:  # Darwin is macOS
+        subprocess.call(["/bin/bash", "-c", "./activate_venv.sh"])
     execute_from_command_line(sys.argv)
 
 
 if __name__ == '__main__':
+    
     main()
