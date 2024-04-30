@@ -49,11 +49,7 @@ class SectionForm(forms.ModelForm):
 
     class Meta:
         model = Section
-<<<<<<< HEAD
         fields = ['id', 'section_number', 'name', 'professor', 'description', 'start_date', 'end_date', 'course_code', 'subject', 'meeting_info', 'seat_capacity', 'credit', 'grading', 'requisites', 'topic']
-=======
-        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'weeks']
->>>>>>> f637bc07289fd58268ecde50beba654626e649cd
 
     def clean(self):
         cleaned_data = super().clean()
@@ -157,17 +153,12 @@ def sections(request):
         section_name = request.GET.get('section_name')
         if section_name:
             sections = sections.filter(name__icontains=section_name)
-<<<<<<< HEAD
         
         form = SectionForm()
 
-=======
-        section_form = SectionForm()
->>>>>>> f637bc07289fd58268ecde50beba654626e649cd
         professors = Professor.objects.all()
 
         current_year = datetime.now().year
-<<<<<<< HEAD
 
         course_code = request.GET.get('course_code')
         if course_code:
@@ -202,9 +193,6 @@ def sections(request):
             sections = sections.filter(topic__icontains=topic)
        
         return render(request, 'main/sections.html', {'form': form, 'sections': sections, 'professors': professors, 'current_year': current_year, 'course_code': course_code, 'subject': subject, 'meeting_info': meeting_info, 'seat_capacity': seat_capacity, 'credit': credit, 'grading': grading, 'requisites': requisites, 'topic': topic})
-=======
-        return render(request, 'main/sections.html', {'section_form': section_form, 'sections': sections, 'professors': professors, 'current_year': current_year})
->>>>>>> f637bc07289fd58268ecde50beba654626e649cd
 
 class OfficeForm(forms.ModelForm):
     building = forms.CharField(required=True)
@@ -226,66 +214,6 @@ def office(request):
         offices = Office.objects.all()
         return render(request, 'main/offices.html', {'office_form': form, 'offices': offices})
 
-<<<<<<< HEAD
-=======
-from datetime import timedelta
-
-class SectionForm(forms.ModelForm):
-    WEEK_CHOICES = [
-        (4, '4 weeks'),
-        (6, '6 weeks'),
-        (12, '12 weeks'),
-        (18, '18 weeks'),
-    ]
-
-    weeks = forms.ChoiceField(choices=WEEK_CHOICES)
-    #end_date = forms.DateTimeField(widget=forms.HiddenInput()) 
-    
-    class Meta:
-        model = Section
-        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'weeks']
-        # Removed 'end_date' from fields
-
-    def clean(self):
-        print("Clean method is called")  # Add this line
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get('start_date')
-        weeks = cleaned_data.get('weeks')
-
-        if start_date:
-            if start_date.month >= Section.SPRING_START_MONTH and start_date.month < Section.SUMMER_START_MONTH:
-                semester = 'Spring'
-            elif start_date.month >= Section.SUMMER_START_MONTH and start_date.month < Section.FALL_START_MONTH:
-                semester = 'Summer'
-            elif start_date.month >= Section.FALL_START_MONTH and start_date.month < Section.WINTER_START_MONTH:
-                semester = 'Fall'
-            else:
-                semester = 'Winter'
-
-            cleaned_data['semester'] = semester
-
-        if start_date and weeks:
-            # Calculate the end date by adding the number of weeks to the start date
-            end_date = start_date + timedelta(weeks=int(weeks))
-
-            # Update the cleaned_data dictionary with the calculated end date
-            cleaned_data['end_date'] = end_date
-            #print(f"{end_date = }")
-
-        return cleaned_data
-    
-    def save(self, commit=True):
-        # Call the original save method to save the fields included in the form
-        section = super().save(commit=False)
-
-        # Update the end_date field manually
-        section.end_date = self.cleaned_data['end_date']
-
-        if commit:
-            section.save()
-        return section
-
->>>>>>> f637bc07289fd58268ecde50beba654626e649cd
 @staff_member_required
 def add_professor(request):
     if request.method == 'POST':

@@ -69,12 +69,7 @@ class SectionForm(forms.ModelForm):
     
     class Meta:
         model = Section
-<<<<<<< HEAD
         fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'end_date', 'course_code', 'subject', 'meeting_info', 'seat_capacity', 'credit', 'grading', 'requisites', 'topic']
-=======
-        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'weeks']
-        # Removed 'end_date' from fields
->>>>>>> f637bc07289fd58268ecde50beba654626e649cd
 
     def clean(self):
         print("Clean method is called")  # Add this line
