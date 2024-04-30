@@ -70,6 +70,7 @@ class SectionForm(forms.ModelForm):
     class Meta:
         model = Section
         fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'course_code', 'subject', 'meeting_info', 'seat_capacity', 'credit', 'grading', 'requisites', 'topic']
+        fields = ['id', 'section_number', 'name', 'description', 'professor', 'start_date', 'end_date', 'course_code', 'subject', 'meeting_info', 'seat_capacity', 'credit', 'grading', 'requisites', 'topic']
 
     def clean(self):
         print("Clean method is called")  # Add this line
