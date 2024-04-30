@@ -209,6 +209,8 @@ def office(request):
         if form.is_valid():
             form.save()
             return redirect('/offices')
+        else:
+            return render(request, 'main/offices.html', {'office_form': form})
     else:
         form = OfficeForm()
         offices = Office.objects.all()
@@ -221,6 +223,8 @@ def add_professor(request):
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/professors')
+        else:
+            return render(request, 'main/add_professor.html', {'form': form})
     else:
         form = ProfessorForm()
     return render(request, 'main/add_professor.html', {'form': form})
@@ -232,6 +236,8 @@ def add_course(request):
         if form.is_valid():
             form.save()
             return redirect('courses')
+        else:
+            return render(request, 'main/add_course.html', {'course_form': form})
     else:
         form = CourseForm()
     return render(request, 'main/add_course.html', {'course_form': form})
@@ -243,6 +249,8 @@ def add_office(request):
         if form.is_valid():
             form.save()
             return redirect('offices')
+        else:
+            return render(request, 'main/add_office.html', {'office_form': form})
     else:
         form = OfficeForm()
     return render(request, 'main/add_office.html', {'office_form': form})
@@ -260,6 +268,8 @@ def edit_office(request, id):
         if form.is_valid():
             form.save()
             return redirect('/offices')
+        else:
+            return render(request, 'main/edit_office.html', {'office_form': form, 'office': office})
     else:
         form = OfficeForm(instance=office)
         return render(request, 'main/edit_office.html', {'office_form': form, 'office': office})
@@ -283,6 +293,8 @@ def edit_course(request, id):
         if form.is_valid():
             form.save()
             return redirect('/courses')
+        else:
+            return render(request, 'main/edit_course.html', {'form': form, 'course': course, 'professors': professors, 'current_year': current_year})
     else:
         form = CourseForm(instance=course)
         return render(request, 'main/edit_course.html', {'form': form, 'course': course, 'professors': professors, 'current_year': current_year})
@@ -301,6 +313,8 @@ def professors(request):
         if form.is_valid():
             form.save()
             return redirect('/professors')
+        else:
+            return render(request, 'main/professors.html', {'form': form})
     else:
         form = ProfessorForm()
         professors = Professor.objects.all()
@@ -320,6 +334,8 @@ def edit_professor(request, id):
         if form.is_valid():
             form.save()
             return redirect('/professors')
+        else:
+            return render(request, 'main/edit_professor.html', {'form': form, 'professor': professor})
     else:
         form = ProfessorForm(instance=professor)
         return render(request, 'main/edit_professor.html', {'form': form, 'professor': professor})
@@ -364,6 +380,8 @@ def add_section(request):
             print(f"End date: {form.cleaned_data['end_date']}")
             form.save()
             return redirect('sections')
+        else:
+            return render(request, 'main/add_section.html', {'section_form': form})
     else:
         form = SectionForm()
     return render(request, 'main/add_section.html', {'section_form': form})
@@ -378,6 +396,8 @@ def edit_section(request, id):
         if form.is_valid():
             form.save()
             return redirect('/sections')
+        else:
+            return render(request, 'main/edit_section.html', {'form': form, 'section': section, 'professors': professors, 'current_year': current_year})
     else:
         form = SectionForm(instance=section)
         return render(request, 'main/edit_section.html', {
