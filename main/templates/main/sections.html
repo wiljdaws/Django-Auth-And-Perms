@@ -31,12 +31,8 @@ container
                                 {% if user.is_staff %}
                                 <th scope="col">Modify Section</th>
                                 {% endif %}
-                                <th>
-                                    <input type="text" id="sectionNumberFilter" onkeyup="filterTable(0, 'sectionNumberFilter')" placeholder="Section Number">
-                                </th>
-                                <th>
-                                    <input type="text" id="courseNameFilter" onkeyup="filterTable(1, 'courseNameFilter')" placeholder="Course Name">
-                                </th>
+                                <th scope="col">Section Number</th>
+                                <th scope="col">Course Name</th>
                                 <th scope="col">Professor</th>
                                 <th scope="col">Course Description</th>
                                 <th scope="col">Start Date</th>
@@ -94,23 +90,4 @@ container
         </div>
     </div>
 </div>
-<script>
-function filterTable(column, inputId) {
-    var input, filter, table, tr, td, i, txtValue;
-    input = document.getElementById(inputId);
-    filter = input.value.toUpperCase();
-    table = document.getElementById("myTable");
-    tr = table.getElementsByTagName("tr");
-    for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[column];
-        if (td) {
-            txtValue = td.textContent || td.innerText;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
-        }       
-    }
-}
 {% endblock %}
